@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from models import Base, AuthorGenre, Book, Genre, Customer, OrderItem
 from datetime import datetime
 
-# Replace 'your_database_url' with your actual database URL
+# actual database URL
 database_url = 'sqlite:///bookstore.db'
 
 engine = create_engine(database_url)
@@ -13,6 +13,22 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 # Seed data for AuthorGenre
+# Seed data for AuthorGenre
+authors = [
+    AuthorGenre(author_name='F. Scott Fitzgerald', birth_year=1900, nationality='American', genre_name='Fiction')
+]
+
+session.add_all(authors)
+session.commit()
+
+# Seed data for Genre
+genres = [
+    Genre(genre_name='Fiction')
+]
+
+session.add_all(genres)
+session.commit()
+
 authors = [
     AuthorGenre(author_name='Author 1', birth_year=1980, nationality='Nationality 1', genre_name='Genre 1'),
     AuthorGenre(author_name='Author 2', birth_year=1990, nationality='Nationality 2', genre_name='Genre 2')
@@ -33,7 +49,7 @@ session.commit()
 # Seed data for Book
 books = [
     Book(title='Book 1', author_id=1, genre_id=1, publication_year=2000, price=20.0),
-    Book(title='Book 2', author_id=2, genre_id=2, publication_year=2010, price=25.0)
+    Book(title='Book 2', author_id=2, genre_id=2, publication_year=2010, price=215.0)
 ]
 
 session.add_all(books)

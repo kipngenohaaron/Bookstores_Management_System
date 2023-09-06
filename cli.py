@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from models import Base, AuthorGenre, Book, Genre, Customer, OrderItem
 from datetime import datetime
 
-# Replace 'your_database_url' with your actual database URL
+# Actual database URL
 database_url = 'sqlite:///bookstore.db'
 
 engine = create_engine(database_url)
@@ -21,151 +21,164 @@ def list_books():
     """List all books in the bookstore"""
     session = DBSession()
     books = session.query(Book).all()
+    session.close()
     for book in books:
-        # Accessing related objects, so the session should remain open
-        author_name = book.author.author_name if book.author else "Unknown Author"
-        genre_name = book.genre.genre_name if book.genre else "Unknown Genre"
-        print(f"Book ID: {book.book_id}, Title: {book.title}, Author: {author_name}, Genre: {genre_name}")
-    
-    session.close()
+        print(f"Book ID: {book.book_id}, Title: {book.title}, Author: {book.author_genre.author_name}, Genre: {book.genre.genre_name}")
 
-# Other commands...
-
-
-
-# Command to add a new book to the bookstore
-@cli.command()
-@click.argument('title')
-@click.argument('author')
-@click.argument('genre')
-@click.argument('publication_year', type=int)
-@click.argument('price', type=float)
-def add_book(title, author, genre, publication_year, price):
-    """Add a new book to the bookstore"""
-    session = DBSession()
-    
-    # Check if author and genre already exist in the database
-    author_genre = session.query(AuthorGenre).filter_by(author_name=author, genre_name=genre).first()
-    if author_genre is None:
-        click.echo(f"Author '{author}' and Genre '{genre}' do not exist. Please add them first.")
-        session.close()
-        return
-    
-    # Use the author_id and genre_id from the author_genre object
-    book = Book(title=title, author_id=author_genre.id, genre_id=author_genre.genre_id, publication_year=publication_year, price=price)
-    session.add(book)
-    session.commit()  # Commit the changes to persist them in the database
-    
-    session.close()
-    click.echo(f"Book '{title}' added successfully!")
-
-# Command to list all authors
-@cli.command()
-def list_authors():
-    """List all authors"""
-    session = DBSession()
-    authors = session.query(AuthorGenre).all()
-    session.close()
-    for author in authors:
-        print(f"Author ID: {author.id}, Name: {author.author_name}, Birth Year: {author.birth_year}, Nationality: {author.nationality}")
-
-# Command to add a new author
-@cli.command()
-@click.argument('name')
-@click.argument('birth_year', type=int)
-@click.argument('nationality')
-@click.argument('genre')
-def add_author(name, birth_year, nationality, genre):
-    """Add a new author to the bookstore"""
-    session = DBSession()
-    
-    # Check if the genre already exists in the database
-    existing_genre = session.query(Genre).filter_by(genre_name=genre).first()
-    if existing_genre is None:
-        click.echo(f"Genre '{genre}' does not exist. Please add it first.")
-        return
-    
-    author_genre = AuthorGenre(author_name=name, birth_year=birth_year, nationality=nationality, genre=genre)
-    session.add(author_genre)
-    session.commit()
-    
-    session.close()
-    click.echo(f"Author '{name}' added successfully!")
-
-# Command to list all genres
-@cli.command()
-def list_genres():
-    """List all genres"""
-    session = DBSession()
-    genres = session.query(Genre).all()
-    session.close()
-    for genre in genres:
-        print(f"Genre ID: {genre.id}, Genre Name: {genre.genre_name}")
-
-# Command to add a new genre
-@cli.command()
-@click.argument('genre_name')
-def add_genre(genre_name):
-    """Add a new genre to the bookstore"""
-    session = DBSession()
-    
-    genre = Genre(genre_name=genre_name)
-    session.add(genre)
-    session.commit()
-    
-    session.close()
-    click.echo(f"Genre '{genre_name}' added successfully!")
-
-# Command to list all customers
 @cli.command()
 def list_customers():
-    """List all customers"""
+    """List all customers in the bookstore"""
     session = DBSession()
     customers = session.query(Customer).all()
     session.close()
     for customer in customers:
         print(f"Customer ID: {customer.customer_id}, Name: {customer.customer_name}, Email: {customer.email}, Phone: {customer.phone}")
 
-# Command to add a new customer
 @cli.command()
-@click.argument('name')
+def list_orders():
+    """List all customer orders in the bookstore"""
+    session = DBSession()
+    orders = session.query(OrderItem).all()
+    session.close()
+    for order in orders:
+        print(f"Order ID: {order.order_id}, Customer ID: {order.customer.customer_id}, Book ID: {order.book.book_id}, Order Date: {order.order_date}, Total Amount: {order.total_amount}")
+
+@cli.command()
+def list_inventory():
+    """List the inventory of books in the bookstore"""
+    session = DBSession()
+    books = session.query(Book).all()
+    session.close()
+    for book in books:
+        print(f"Book ID: {book.book_id}, Title: {book.title}, Quantity in Stock: {book.order_items[0].quantity_in_stock if book.order_items else 0}")
+
+@cli.command()
+@click.argument('customer_name')
 @click.argument('email')
 @click.argument('phone')
-def add_customer(name, email, phone):
+def add_customer(customer_name, email, phone):
     """Add a new customer to the bookstore"""
     session = DBSession()
     
-    customer = Customer(customer_name=name, email=email, phone=phone)
+    customer = Customer(customer_name=customer_name, email=email, phone=phone)
     session.add(customer)
     session.commit()
     
     session.close()
-    click.echo(f"Customer '{name}' added successfully!")
+    click.echo(f"Customer '{customer_name}' added successfully!")
 
-# Command to add a new order item
 @cli.command()
-@click.argument('customer_id', type=int)
-@click.argument('book_id', type=int)
-@click.argument('total_amount', type=float)
+@click.argument('book_title')
+@click.argument('author_name')
+@click.argument('genre_name')
+@click.argument('publication_year', type=int)
+@click.argument('price', type=float)
 @click.argument('quantity_in_stock', type=int)
-def add_order_item(customer_id, book_id, total_amount, quantity_in_stock):
-    """Add a new order item to the bookstore"""
+def add_book(book_title, author_name, genre_name, publication_year, price, quantity_in_stock):
+    """Add a new book to the bookstore"""
     session = DBSession()
     
-    # Check if the customer and book exist in the database
-    customer = session.query(Customer).filter_by(customer_id=customer_id).first()
-    book = session.query(Book).filter_by(book_id=book_id).first()
-    if customer is None or book is None:
-        click.echo(f"Customer or book not found. Please check the IDs.")
+    # Check if author and genre already exist in the database
+    author_genre = session.query(AuthorGenre).filter_by(author_name=author_name, genre_name=genre_name).first()
+    if author_genre is None:
+        click.echo(f"Author '{author_name}' and Genre '{genre_name}' do not exist. Please add them first.")
         return
     
-    order_date = datetime.now()
-    order_item = OrderItem(customer=customer, book=book, order_date=order_date, total_amount=total_amount, quantity_in_stock=quantity_in_stock)
+    # Use the author_id and genre_id from the author_genre object
+    book = Book(title=book_title, author_id=author_genre.id, genre_id=author_genre.genre_id, publication_year=publication_year, price=price)
+    order_item = OrderItem(customer_id=None, book=book, order_date=None, total_amount=0.0, quantity_in_stock=quantity_in_stock)
     session.add(order_item)
     session.commit()
     
     session.close()
-    click.echo(f"Order item added successfully!")
+    click.echo(f"Book '{book_title}' added successfully!")
+
+@cli.command()
+@click.argument('customer_id', type=int)
+@click.argument('email')
+@click.argument('phone')
+def update_customer(customer_id, email, phone):
+    """Update customer information"""
+    session = DBSession()
+    customer = session.query(Customer).filter_by(customer_id=customer_id).first()
+    
+    if customer:
+        customer.email = email
+        customer.phone = phone
+        session.commit()
+        session.close()
+        click.echo(f"Customer information updated successfully!")
+    else:
+        session.close()
+        click.echo(f"Customer with ID {customer_id} does not exist.")
+
+@cli.command()
+@click.argument('book_id', type=int)
+@click.argument('book_title')
+@click.argument('author_name')
+@click.argument('genre_name')
+@click.argument('publication_year', type=int)
+@click.argument('price', type=float)
+@click.argument('quantity_in_stock', type=int)
+def update_book(book_id, book_title, author_name, genre_name, publication_year, price, quantity_in_stock):
+    """Update book information"""
+    session = DBSession()
+    book = session.query(Book).filter_by(book_id=book_id).first()
+    
+    if book:
+        author_genre = session.query(AuthorGenre).filter_by(author_name=author_name, genre_name=genre_name).first()
+        if author_genre is None:
+            click.echo(f"Author '{author_name}' and Genre '{genre_name}' do not exist. Please add them first.")
+            return
+
+        book.title = book_title
+        book.author_id = author_genre.id
+        book.genre_id = author_genre.genre_id
+        book.publication_year = publication_year
+        book.price = price
+
+        order_item = session.query(OrderItem).filter_by(book_id=book_id).first()
+        if order_item:
+            order_item.quantity_in_stock = quantity_in_stock
+
+        session.commit()
+        session.close()
+        click.echo(f"Book information updated successfully!")
+    else:
+        session.close()
+        click.echo(f"Book with ID {book_id} does not exist.")
+
+@cli.command()
+@click.argument('customer_id', type=int)
+def delete_customer(customer_id):
+    """Delete a customer from the bookstore"""
+    session = DBSession()
+    customer = session.query(Customer).filter_by(customer_id=customer_id).first()
+    
+    if customer:
+        session.delete(customer)
+        session.commit()
+        session.close()
+        click.echo(f"Customer with ID {customer_id} deleted successfully!")
+    else:
+        session.close()
+        click.echo(f"Customer with ID {customer_id} does not exist.")
+
+@cli.command()
+@click.argument('book_id', type=int)
+def delete_book(book_id):
+    """Delete a book from the bookstore"""
+    session = DBSession()
+    book = session.query(Book).filter_by(book_id=book_id).first()
+    
+    if book:
+        session.delete(book)
+        session.commit()
+        session.close()
+        click.echo(f"Book with ID {book_id} deleted successfully!")
+    else:
+        session.close()
+        click.echo(f"Book with ID {book_id} does not exist.")
 
 if __name__ == '__main__':
     cli()
