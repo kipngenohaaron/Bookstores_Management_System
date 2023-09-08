@@ -1,4 +1,4 @@
-# author: KIPNGENOH A.
+# Author: KIPNGENOH A.
 
 # Bookstore Management System CLI
 
