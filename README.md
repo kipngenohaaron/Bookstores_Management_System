@@ -154,6 +154,9 @@ Replace `BOOK_ID` with the actual book ID.
 Email: kipngenohaaron@gmail.com
 Phone Number: 0724 279 400 / 0724 828 197
 
+## dbdiagram
+### link: https://dbdiagram.io/d/64f6e09102bd1c4a5efa9d19
+
 ## Contributing
 
 If you would like to contribute to this project or report issues, please open an issue or pull request on the GitHub repository: [bookstore-management-cli](hhttps://github.com/kipngenohaaron/Bookstores_Management_System.git).
