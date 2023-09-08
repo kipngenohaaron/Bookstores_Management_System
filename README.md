@@ -2,7 +2,7 @@
 
 # Bookstore Management System CLI
 
-The Bookstore Management System CLI is a command-line interface for managing a bookstore's inventory, customers, and orders. With this tool, you can easily perform various tasks to help you manage your bookstore efficiently.
+The Bookstores Management System is a Python-based command-line application for managing a bookstore's inventory, customers, and orders. This system allows you to perform various tasks, including adding and updating books, managing customers, and tracking orders. It is built using SQLAlchemy for database management and Click for creating a command-line interface.
 
 ## Table of Contents
 
@@ -12,7 +12,6 @@ The Bookstore Management System CLI is a command-line interface for managing a b
   - [List Books](#list-books)
   - [List Customers](#list-customers)
   - [List Orders](#list-orders)
-  - [List Inventory](#list-inventory)
   - [Add Customer](#add-customer)
   - [Add Book](#add-book)
   - [Update Customer](#update-customer)
@@ -84,13 +83,6 @@ List all customer orders in the bookstore:
 python cli.py list-orders
 ```
 
-### List Inventory
-
-List the inventory of books in the bookstore:
-
-```shell
-python cli.py list-inventory
-```
 
 ### Add Customer
 
@@ -157,10 +149,29 @@ Phone Number: 0724 279 400 / 0724 828 197
 ## dbdiagram
 ### link: https://dbdiagram.io/d/64f6e09102bd1c4a5efa9d19
 
+## Database
+
+The application uses a SQLite database to store book, customer, and order data. The database file `bookstore.db` will be created in the project directory when you run the `create_database.py` script.
+
+
 ## Contributing
 
 If you would like to contribute to this project or report issues, please open an issue or pull request on the GitHub repository: [bookstore-management-cli](hhttps://github.com/kipngenohaaron/Bookstores_Management_System.git).
 
+Contributions are welcome! If you would like to contribute to this project, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix: `git checkout -b feature/your-feature-name`.
+3. Commit your changes and push them to your fork: `git push origin feature/your-feature-name`.
+4. Create a pull request describing your changes.
+
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [SQLAlchemy](https://www.sqlalchemy.org/)
+- [Click](https://click.palletsprojects.com/en/7.x/)
+
+
