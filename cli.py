@@ -5,19 +5,22 @@ from models import Base, AuthorGenre, Book, Genre, Customer, OrderItem
 from datetime import datetime
 from sqlalchemy.orm import joinedload
 
-
 # Actual database URL
 database_url = 'sqlite:///bookstore.db'
 
+# Create a database engine and bind it to the Base metadata
 engine = create_engine(database_url)
 Base.metadata.bind = engine
 
+# Create a session factory
 DBSession = sessionmaker(bind=engine)
 
+# Define the main CLI group
 @click.group()
 def cli():
     """Bookstore Management System CLI"""
 
+# Command to list all books in the bookstore
 @cli.command()
 def list_books():
     """List all books in the bookstore"""
@@ -27,6 +30,7 @@ def list_books():
     for book in books:
         print(f"Book ID: {book.book_id}, Title: {book.title}, Author: {book.author_genre.author_name}, Genre: {book.genre.genre_name}")
 
+# Command to list all customers in the bookstore
 @cli.command()
 def list_customers():
     """List all customers in the bookstore"""
@@ -36,51 +40,59 @@ def list_customers():
     for customer in customers:
         print(f"Customer ID: {customer.customer_id}, Name: {customer.customer_name}, Email: {customer.email}, Phone: {customer.phone}")
 
-# @cli.command()
-# def list_orders():
-#     """List all customer orders in the bookstore"""
-#     session = DBSession()
-#     orders = session.query(OrderItem).all()
-#     session.close()
-#     for order in orders:
-#         print(f"Order ID: {order.order_id}, Customer ID: {order.customer.customer_id}, Book ID: {order.book.book_id}, Order Date: {order.order_date}, Total Amount: {order.total_amount}")
-
+# Command to add a new author to the bookstore
 @cli.command()
 @click.argument('author_name')
 def add_author(author_name):
     """Add a new author to the bookstore"""
     session = DBSession()
     
+    # Create a new AuthorGenre instance
     author = AuthorGenre(author_name=author_name)
+    
+    # Add the author to the session and commit the transaction
     session.add(author)
     session.commit()
     
+    # Close the session and provide feedback
     session.close()
     click.echo(f"Author '{author_name}' added successfully!")
 
+# Command to add a new genre to the bookstore
 @cli.command()
 @click.argument('genre_name')
 def add_genre(genre_name):
     """Add a new genre to the bookstore"""
     session = DBSession()
     
+    # Create a new Genre instance
     genre = Genre(genre_name=genre_name)
+    
+    # Add the genre to the session and commit the transaction
     session.add(genre)
     session.commit()
     
+    # Close the session and provide feedback
     session.close()
     click.echo(f"Genre '{genre_name}' added successfully!")
 
+# Command to list all customer orders with customer and book details
 @cli.command()
 def list_orders():
     """List all customer orders in the bookstore"""
     session = DBSession()
+    
+    # Query all order items and eagerly load associated customer and book data
     orders = session.query(OrderItem).options(joinedload(OrderItem.customer), joinedload(OrderItem.book)).all()
+    
+    # Close the session
     session.close()
+    
+    # Print order information
     for order in orders:
         print(f"Order ID: {order.order_id}, Customer ID: {order.customer.customer_id}, Book ID: {order.book.book_id}, Order Date: {order.order_date}, Total Amount: {order.total_amount}")
 
-# Define the search_books command within the same cli() function
+# Command to search books by title, author, or genre
 @cli.command()
 @click.option("--title", help="Search books by title.")
 @click.option("--author", help="Search books by author name.")
@@ -89,8 +101,10 @@ def search_books(title, author, genre):
     """Search books based on title, author, or genre."""
     session = DBSession()
 
+    # Create a query that selects books and eagerly loads author and genre data
     query = session.query(Book).join(AuthorGenre).join(Genre)
 
+    # Add filters based on provided options
     if title:
         query = query.filter(Book.title.like(f"%{title}%"))
 
@@ -100,10 +114,13 @@ def search_books(title, author, genre):
     if genre:
         query = query.filter(Genre.genre_name.like(f"%{genre}%"))
 
+    # Execute the query and get the list of matching books
     books = query.all()
 
+    # Close the session
     session.close()
 
+    # Display the results or indicate no matching books found
     if not books:
         print("No matching books found.")
     else:
@@ -111,7 +128,19 @@ def search_books(title, author, genre):
         for book in books:
             print(f"Book ID: {book.book_id}, Title: {book.title}, Author: {book.author_genre.author_name}, Genre: {book.genre.genre_name}")
 
-
+@cli.command()
+def list_books():
+    """List all books in the bookstore"""
+    session = DBSession()
+    
+    # Use joinedload to load the 'author' and 'genre' relationships in the same query
+    books = session.query(Book).options(joinedload(Book.author), joinedload(Book.genre)).all()
+    
+    session.close()
+    
+    for book in books:
+        # Now you can access the 'author' and 'genre' attributes without issues
+        print(f"Book ID: {book.book_id}, Title: {book.title}, Author: {book.author.author_name}, Genre: {book.genre.genre_name}")
 
 @cli.command()
 def list_inventory():
