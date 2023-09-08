@@ -142,6 +142,51 @@ def list_books():
         # Now you can access the 'author' and 'genre' attributes without issues
         print(f"Book ID: {book.book_id}, Title: {book.title}, Author: {book.author.author_name}, Genre: {book.genre.genre_name}")
 
+# Adding the book
+@cli.command()
+@click.argument('book_title')
+@click.argument('author_name')
+@click.argument('genre_name')
+@click.argument('publication_year', type=int)
+@click.argument('price', type=float)
+@click.argument('quantity_in_stock', type=int)
+def add_book(book_title, author_name, genre_name, publication_year, price, quantity_in_stock):
+    """Add a new book to the bookstore"""
+    session = DBSession()
+    
+    # Check if author and genre already exist in the database or create them if not
+    author = session.query(AuthorGenre).filter_by(author_name=author_name).first()
+    genre = session.query(Genre).filter_by(genre_name=genre_name).first()
+    
+    if author is None:
+        author = AuthorGenre(author_name=author_name)
+        session.add(author)
+    
+    if genre is None:
+        genre = Genre(genre_name=genre_name)
+        session.add(genre)
+
+    # Create a new book instance and add it to the session
+    book = Book(
+        title=book_title,
+        author=author,
+        genre=genre,
+        publication_year=publication_year,
+        price=price,
+    )
+    session.add(book)
+
+    # Create an order item for the book and set its quantity in stock
+    order_item = OrderItem(book=book, quantity_in_stock=quantity_in_stock)
+    session.add(order_item)
+
+    # Commit the changes and close the session
+    session.commit()
+    session.close()
+    
+    click.echo(f"Book '{book_title}' added successfully!")
+
+
 @cli.command()
 def list_inventory():
     """List the inventory of books in the bookstore"""
