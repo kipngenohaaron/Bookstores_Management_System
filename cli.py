@@ -80,7 +80,39 @@ def list_orders():
     for order in orders:
         print(f"Order ID: {order.order_id}, Customer ID: {order.customer.customer_id}, Book ID: {order.book.book_id}, Order Date: {order.order_date}, Total Amount: {order.total_amount}")
 
+@cli.command()
+@click.option('--title', help='Search by book title')
+@click.option('--author', help='Search by author name')
+@click.option('--genre', help='Search by genre name')
+def search_books(title, author, genre):
+    """Search for books based on criteria"""
+    session = Session()
 
+    # Start with a query for all books
+    query = session.query(Book)
+
+    if title:
+        # Filter by book title if provided
+        query = query.filter(Book.title.ilike(f'%{title}%'))
+
+    if author:
+        # Filter by author name if provided
+        query = query.join(Book.author).filter(Book.author.author_name.ilike(f'%{author}%'))
+
+    if genre:
+        # Filter by genre name if provided
+        query = query.join(Book.genre).filter(Book.genre.genre_name.ilike(f'%{genre}%'))
+
+    # Retrieve and display the matching books
+    books = query.all()
+    session.close()
+
+    if not books:
+        click.echo("No matching books found.")
+    else:
+        click.echo("Matching books:")
+        for book in books:
+            click.echo(f"Book ID: {book.book_id}, Title: {book.title}, Author: {book.author.author_name}, Genre: {book.genre.genre_name}")
 
 
 @cli.command()

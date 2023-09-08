@@ -36,8 +36,7 @@ class Book(Base):
     # Define one-to-many relationship with order_items
     order_items = relationship('OrderItem', back_populates='book')  # This line should be included
 
-    # Rest of the class definition remains the same
-
+   
 class Genre(Base):
     __tablename__ = 'genre'
 
