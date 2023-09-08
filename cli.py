@@ -95,7 +95,7 @@ def search_books(title, author, genre):
     if title:
         query = query.filter(Book.title.like(f"%{title}%"))
     if author:
-        query = query.join(AuthorGenre).join(author).filter(author.author_name.like(f"%{author}%"))
+       query = query.join(AuthorGenre).join(author).filter(author.author_name.like(f"%Margaret%"))
     if genre:
         query = query.join(Genre).filter(Genre.genre_name.like(f"%{genre}%"))
 
