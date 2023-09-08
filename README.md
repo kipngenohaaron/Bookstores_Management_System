@@ -147,7 +147,7 @@ Email: kipngenohaaron@gmail.com
 Phone Number: 0724 279 400 / 0724 828 197
 
 ## dbdiagram
-### link: https://dbdiagram.io/d/64f6e09102bd1c4a5efa9d19
+### Link: https://dbdiagram.io/d/64f6e09102bd1c4a5efa9d19
 
 ## Database
 
@@ -167,7 +167,7 @@ Contributions are welcome! If you would like to contribute to this project, plea
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## Acknowledgments
 
