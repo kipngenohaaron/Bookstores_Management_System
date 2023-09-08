@@ -3,6 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base, AuthorGenre, Book, Genre, Customer, OrderItem
 from datetime import datetime
+from sqlalchemy.orm import joinedload
+
 
 # Actual database URL
 database_url = 'sqlite:///bookstore.db'
@@ -34,14 +36,26 @@ def list_customers():
     for customer in customers:
         print(f"Customer ID: {customer.customer_id}, Name: {customer.customer_name}, Email: {customer.email}, Phone: {customer.phone}")
 
+# @cli.command()
+# def list_orders():
+#     """List all customer orders in the bookstore"""
+#     session = DBSession()
+#     orders = session.query(OrderItem).all()
+#     session.close()
+#     for order in orders:
+#         print(f"Order ID: {order.order_id}, Customer ID: {order.customer.customer_id}, Book ID: {order.book.book_id}, Order Date: {order.order_date}, Total Amount: {order.total_amount}")
+
 @cli.command()
 def list_orders():
     """List all customer orders in the bookstore"""
     session = DBSession()
-    orders = session.query(OrderItem).all()
+    orders = session.query(OrderItem).options(joinedload(OrderItem.customer), joinedload(OrderItem.book)).all()
     session.close()
     for order in orders:
         print(f"Order ID: {order.order_id}, Customer ID: {order.customer.customer_id}, Book ID: {order.book.book_id}, Order Date: {order.order_date}, Total Amount: {order.total_amount}")
+
+
+
 
 @cli.command()
 def list_inventory():
