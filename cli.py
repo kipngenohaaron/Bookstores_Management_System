@@ -80,37 +80,36 @@ def list_orders():
     for order in orders:
         print(f"Order ID: {order.order_id}, Customer ID: {order.customer.customer_id}, Book ID: {order.book.book_id}, Order Date: {order.order_date}, Total Amount: {order.total_amount}")
 
+# Define the search_books command within the same cli() function
 @cli.command()
-@click.option('--title', help='Search books by title')
-@click.option('--author', help='Search books by author')
-@click.option('--genre', help='Search books by genre')
+@click.option("--title", help="Search books by title.")
+@click.option("--author", help="Search books by author name.")
+@click.option("--genre", help="Search books by genre name.")
 def search_books(title, author, genre):
-    """Search for books based on title, author, or genre"""
+    """Search books based on title, author, or genre."""
     session = DBSession()
 
-    # Initialize a query for the Book model
-    query = session.query(Book)
+    query = session.query(Book).join(AuthorGenre).join(Genre)
 
-    # Apply filters based on user input
     if title:
         query = query.filter(Book.title.like(f"%{title}%"))
-    if author:
-       query = query.join(AuthorGenre).join(author).filter(author.author_name.like(f"%Margaret%"))
-    if genre:
-        query = query.join(Genre).filter(Genre.genre_name.like(f"%{genre}%"))
 
-    # Execute the query
-    matching_books = query.all()
+    if author:
+        query = query.filter(AuthorGenre.author_name.like(f"%{author}%"))
+
+    if genre:
+        query = query.filter(Genre.genre_name.like(f"%{genre}%"))
+
+    books = query.all()
 
     session.close()
 
-    if matching_books:
-        print("Matching books:")
-        for book in matching_books:
-            print(f"Book ID: {book.book_id}, Title: {book.title}, Author: {book.author_genre.author_name}, Genre: {book.genre.genre_name}")
-    else:
+    if not books:
         print("No matching books found.")
-
+    else:
+        print("Matching books:")
+        for book in books:
+            print(f"Book ID: {book.book_id}, Title: {book.title}, Author: {book.author_genre.author_name}, Genre: {book.genre.genre_name}")
 
 
 
