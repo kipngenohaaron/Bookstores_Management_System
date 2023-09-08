@@ -81,38 +81,38 @@ def list_orders():
         print(f"Order ID: {order.order_id}, Customer ID: {order.customer.customer_id}, Book ID: {order.book.book_id}, Order Date: {order.order_date}, Total Amount: {order.total_amount}")
 
 @cli.command()
-@click.option('--title', help='Search by book title')
-@click.option('--author', help='Search by author name')
-@click.option('--genre', help='Search by genre name')
+@click.option('--title', help='Search books by title')
+@click.option('--author', help='Search books by author')
+@click.option('--genre', help='Search books by genre')
 def search_books(title, author, genre):
-    """Search for books based on criteria"""
-    session = Session()
+    """Search for books based on title, author, or genre"""
+    session = DBSession()
 
-    # Start with a query for all books
+    # Initialize a query for the Book model
     query = session.query(Book)
 
+    # Apply filters based on user input
     if title:
-        # Filter by book title if provided
-        query = query.filter(Book.title.ilike(f'%{title}%'))
-
+        query = query.filter(Book.title.like(f"%{title}%"))
     if author:
-        # Filter by author name if provided
-        query = query.join(Book.author).filter(Book.author.author_name.ilike(f'%{author}%'))
-
+        query = query.join(AuthorGenre).join(Author).filter(Author.author_name.like(f"%{author}%"))
     if genre:
-        # Filter by genre name if provided
-        query = query.join(Book.genre).filter(Book.genre.genre_name.ilike(f'%{genre}%'))
+        query = query.join(Genre).filter(Genre.genre_name.like(f"%{genre}%"))
 
-    # Retrieve and display the matching books
-    books = query.all()
+    # Execute the query
+    matching_books = query.all()
+
     session.close()
 
-    if not books:
-        click.echo("No matching books found.")
+    if matching_books:
+        print("Matching books:")
+        for book in matching_books:
+            print(f"Book ID: {book.book_id}, Title: {book.title}, Author: {book.author_genre.author_name}, Genre: {book.genre.genre_name}")
     else:
-        click.echo("Matching books:")
-        for book in books:
-            click.echo(f"Book ID: {book.book_id}, Title: {book.title}, Author: {book.author.author_name}, Genre: {book.genre.genre_name}")
+        print("No matching books found.")
+
+
+
 
 
 @cli.command()
